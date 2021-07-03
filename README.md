@@ -1,4 +1,6 @@
 # Monitoring-Scripts-Monitoing-Webapp
+For this project there are a number of monitoring tools that can provide comprehensive monitoring capacity - The most common in AWS cloud is cloudwatch, my current project in AWS was for one of the leading retail giant in the UK - a web appication, all the logs are ingest into S3 with WAF rules configured to push all external logs to clouwatch and I leverage Athena to read WAF log. I used cloudwatch to get realtime statistic of system reources. In AWS i strongly recommend pushing all logs to cloudwatch. For none AWS lightwight monitoring I recommned monit and Netdata they can provide comprehensive monitoring capability.
+
 Understanding the state of your application and the percentage of system resources it consumes enable you to plan for capacity expansion and isoldate performance bottleneck. Application performance is strongly dependent on system resources as such it is critical we monitor and understand which application is utilizing what percentage of system resource. 
 
 Installing Monit on Ubuntu
