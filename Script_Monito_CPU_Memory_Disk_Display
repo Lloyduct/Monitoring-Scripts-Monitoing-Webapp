@@ -1,0 +1,45 @@
+#This script is used to generate CPU, Memory, SWAP and Disk Usage statistic. The aim is to make it easy for anyone to understand system performance. For you to get the output for SWAP - swap shouldnt be zero if swap is zero you can commit swap line. 
+#While there might be room for improvement please feel free to contact me via email awsdevops1130@gmail.com.
+#!/bin/bash
+if which mailx > /dev/null
+then
+echo "mailx package exist"
+elif (( $(cat /etc/*-release | grep "Red Hat" | wc -l) > 0 ))
+then
+yum install sendmail mailx  net-tools dstat  -y > /dev/null
+else
+apt install mailutils net-tools dstat -y > /dev/null
+fi
+echo "--------------------------------------------------------------"
+echo "Server_Name   CPU(%)   Memory(%)   Swap(%)          Disk Usage"
+echo "--------------------------------------------------------------"
+hostname -I | cut -d' ' -f1 > host_IP
+for server in `cat host_IP`
+do
+scpu=$( cat /proc/stat | awk '/cpu/{printf("%.2f%\n"), ($2+$4)*100/($2+$4+$5)}' |  awk '{print $0}' | head -1)
+smem=$( free | awk '/Mem/{printf("%.2f%"), $3/$2*100}')
+sswap=$(free | awk '/Swap/{printf("%.2f%"), $3/$2*80}')
+sdisk=$( df -h | awk '$NF=="/"{printf "Disk Usage: %d/%dGB (%s)\n", $3,$2,$5}')
+echo "$server   $scpu   $smem   $sswap $sdisk"
+done | column -t
+echo "---------------------------------------------------------------"
+echo "File System Usage"
+echo "-----------------"
+df -H | grep -vE '^Filesystem|tmpfs|cdrom' | awk '{ print $5 " " $1 }'
+echo "---------------------------------------------------------------"
+echo "Disk IO Utilization"
+echo "-------------------" 
+dstat --time --cpu --mem --load --io 1 5
+echo "---------------------------------------------------------------"
+echo "Top Process Utilization"
+echo "-----------------------"
+ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
+echo "---------------------------------------------------------------"
+echo "Top Process Utilization with more details"
+echo "-----------------------------------------"
+ps -eo pmem,pcpu,rss,vsize,args,user,euser,ruser,suser,fuser,f,comm,label,pid | sort -k 1 -r | head
+echo "--------------------------------------------------------------------------------------------------------------------------------------------------------"
+echo "Top Established connections for webapp"
+echo "--------------------------------------"
+netstat -tanp  | grep ESTABLISHED |sort | uniq -c | sort -n|head
+echo "---------------------------------------------------------------"

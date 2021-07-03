@@ -1,0 +1,30 @@
+## Monit is a free and open source tool for managing and monitoring processes, programs, files, directories and filesystems on a Unix system.
+## This script will install monit, apache, docker as a sample application which monit will monitor, open the default port and copy the custom configuration to monitor the application and root file system.
+## The login user is admin and password is monit as shown below. When installed you can leverage other futures as deem fit.
+## This script was tested on Ubuntu 20.04.2 LTS
+ #### Run this script only if you have root privilege #####
+if [ "$(id -u)" != '0' ]
+then
+        echo "Sorry this script has to be run as root"
+        exit 1
+fi
+ sudo apt-get update -y  > /dev/null 
+ sudo apt-get install monit -y > /dev/null 
+ sudo systemctl start monit -y > /dev/null
+ sudo systemctl enable monit -y > /dev/null
+ sudo apt-get install postgresql -y  > /dev/null 
+ sudo systemctl start postgresql -y > /dev/null
+ sudo systemctl enable postgresql -y > /dev/null
+ sudo apt-get install apache2 -y  > /dev/null
+ sudo systemctl start apache2 -y  > /dev/null 
+ sudo systemctl enable apache2  -y > /dev/null
+ sudo apt-get  install docker.io -y   > /dev/null
+ sudo systemctl start docker -y  > /dev/null
+ sudo systemctl enable docker -y > /dev/null 
+ echo "set httpd port 8080 and" >>  /etc/monit/monitrc # You  can use any port based on your environment for this activity port 8080
+ echo "use address localhost  # only accept connection from localhost" >> /etc/monit/monitrc
+ echo "allow localhost        # allow localhost to connect to the server and" >> /etc/monit/monitrc
+ echo "allow admin:monit      # require user 'admin' with password 'monit" >> /etc/monit/monitrc
+ cp /root/custom.conf /etc/monit/conf.d/custom.conf
+ monit reload > /dev/null
+ echo "Installation Completed Successfully"
